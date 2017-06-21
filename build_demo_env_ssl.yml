@@ -1,0 +1,20 @@
+---
+- hosts: data-tier
+  roles:
+    - mysql-server
+    - { role: deploy-certs, owner: "mysql", path: "/etc/mysql-ssl" }
+    - mysql-server-ssl
+
+- hosts: proxy-tier
+  roles:
+    - nginx
+    - nginx-proxy
+
+- hosts: api-tier
+  serial: 1
+  roles:
+    - httpd
+    - api-code
+    - { role: deploy-certs, owner: "root", path: "/var/www/certs", ttl: "1h" }
+    - deploy-credentials
+    - { role: proxy-target, state_var: present }

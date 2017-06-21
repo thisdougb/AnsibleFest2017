@@ -1,0 +1,11 @@
+vault
+
+[data-tier]
+database
+
+[api-tier]
+api1
+api2
+
+[proxy-tier]
+proxy

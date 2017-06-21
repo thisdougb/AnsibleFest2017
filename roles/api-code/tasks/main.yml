@@ -1,0 +1,12 @@
+---
+# tasks file for roles/api-code
+
+- name: clean certs dir
+  file:
+    path: /var/www/certs
+    state: absent
+
+- name: install demo api code
+  copy:
+    src: index.php
+    dest: /var/www/html/index.php

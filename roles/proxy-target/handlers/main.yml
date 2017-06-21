@@ -1,0 +1,6 @@
+---
+# handlers file for roles/proxy-target
+
+- name: restart nginx
+  service: name=nginx state=restarted
+  delegate_to: proxy

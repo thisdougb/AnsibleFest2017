@@ -1,0 +1,96 @@
+---
+# tasks file for roles/mysql-server
+
+- name: copy mysql repo rpm to host
+  copy:
+    src: mysql57-community-release-el7-10.noarch.rpm
+    dest: /tmp/mysql57-community-release-el7-10.noarch.rpm
+    force: no
+
+- name: install mysql repo rpm
+  yum:
+    name: /tmp/mysql57-community-release-el7-10.noarch.rpm
+    state: present
+
+- name: install mysql client/dev rpms
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - mysql-community-client
+    - mysql-devel
+    - python-devel
+    - python-pip
+
+- name: install pip mysqldb
+  pip:
+    name: MySQL-python
+
+- name: install mysql server rpm
+  yum:
+    name: mysql-community-server
+    state: present
+  register: mysqlrpminstall
+
+- name: stop mysqld
+  service:
+    name: mysqld
+    state: stopped
+
+- name: clear out mysql data dir
+  file:
+    path: /var/lib/mysql
+    state: absent
+
+- name: initialize mysql without a root password
+  command: mysqld --initialize-insecure --user=mysql
+  ignore_errors: true
+  register: mysqlinit
+
+- name: install /etc/my.cnf
+  copy:
+    src: my.cnf
+    dest: /etc/my.cnf
+
+- name: start mysqld
+  service:
+    name: mysqld
+    state: started
+    enabled: true
+
+- block:
+
+  - name: retrieve keys locally
+    set_fact:
+      vault_keys: "{{ lookup('file','~/.hashicorp_vault_keys.json') | from_json }}"
+    delegate_to: localhost
+    become: no
+
+  - name: generate random string
+    shell: </dev/urandom tr -dc '1234567890qwertyuiop' | head -c20; echo
+    register: rand_pw_string
+    delegate_to: localhost
+    become: no
+
+  - name: write mysql secret to vault
+    uri:
+      url: "https://vault.ansiblefest.com:8201/v1/secret/AnsibleFest/database"
+      method: POST
+      headers:
+        X-Vault-Token: "{{ vault_keys.root_token }}"
+      body:
+        mysqlrootpw: "{{ rand_pw_string.stdout }}"
+      body_format: json
+      status_code: 204
+    delegate_to: localhost
+    become: no
+
+  - name: set initial root password
+    mysql_user:
+      name: root
+      password: "{{ rand_pw_string.stdout }}"
+      host: localhost
+      state: present
+    delegate_to: database
+
+  when: mysqlinit | success

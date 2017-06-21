@@ -1,0 +1,4 @@
+---
+# vars file for roles/proxy-target
+
+state_var: present

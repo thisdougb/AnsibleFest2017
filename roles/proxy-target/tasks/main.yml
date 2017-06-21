@@ -1,0 +1,26 @@
+---
+# tasks file for roles/proxy-target
+
+- name: verify api is working via web call
+  uri:
+    url: "http://{{ inventory_hostname }}"
+    status_code: 200
+  when: state_var == "present"
+
+- name: delay 3 seconds for dramatic effect...
+  command: sleep 3
+  when: state_var == "present"
+
+- name: "configure {{ inventory_hostname }} proxy state: {{ state_var }}"
+  lineinfile:
+    dest: /etc/nginx/nginx.conf
+    insertafter: '^    upstream apitier {'
+    line: "         server {{ inventory_hostname }};"
+    state: "{{ state_var }}"
+  delegate_to: proxy
+
+- name: reload proxy for change to take effect
+  service:
+    name: nginx
+    state: restarted
+  delegate_to: proxy

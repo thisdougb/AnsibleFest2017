@@ -1,0 +1,17 @@
+---
+# tasks file for roles/mysql-server-ssl
+
+- name: add ssl config to my.cnf
+  blockinfile:
+    path: /etc/my.cnf
+    insertafter: "[mysqld]"
+    marker: "# -- {mark} ANSIBLE MANAGED BLOCK --"
+    content: |
+      ssl-cert=/etc/mysql-ssl/certificate.pem
+      ssl-key=/etc/mysql-ssl/private_key.pem
+      ssl-ca=/etc/mysql-ssl/issuing_ca.pem
+
+- name: restart mysqld for ssl config to take effect
+  service:
+    name: mysqld
+    state: restarted

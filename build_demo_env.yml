@@ -1,0 +1,17 @@
+---
+- hosts: data-tier
+  roles:
+    - mysql-server
+
+- hosts: proxy-tier
+  roles:
+    - nginx
+    - nginx-proxy
+
+- hosts: api-tier
+  serial: 1
+  roles:
+    - httpd
+    - api-code
+    - deploy-credentials
+    - { role: proxy-target, state_var: present }

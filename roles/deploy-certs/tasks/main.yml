@@ -1,0 +1,69 @@
+---
+# tasks file for roles/deploy-certs
+
+- name: lookup auth token for Hashi Vault
+  set_fact:
+    vault_keys: "{{ lookup('file','~/.hashicorp_vault_keys.json') | from_json }}"
+  delegate_to: localhost
+  become: no
+
+- name: request a cert from Hashi Vault
+  uri:
+    url: "https://vault.ansiblefest.com:8201/v1/pki/issue/fest_london"
+    method: POST
+    headers:
+      X-Vault-Token: "{{ vault_keys.root_token }}"
+    body:
+      common_name:
+        "{{ inventory_hostname }}.ansiblefest.com"
+      ttl:
+        "{{ ttl | default('') }}"
+    body_format: json
+    return_content: yes
+  register: cert_data
+  delegate_to: localhost
+
+- name: create mysql certs dir
+  file:
+    path: "{{ path }}"
+    state: directory
+    owner: "{{ owner }}"
+    group: "{{ owner }}"
+    mode: 0711
+
+- name: write out certificate
+  copy: 
+    content: "{{ cert_data.json.data.certificate }}" 
+    dest: "{{ path }}/certificate.pem"
+    owner: "{{ owner }}"
+    group: "{{ owner }}"
+    mode: 0644
+
+- name: write out private key
+  copy: 
+    content: "{{ cert_data.json.data.private_key }}" 
+    dest: "{{ path }}/private_key.pem"
+    owner: "{{ owner }}"
+    group: "{{ owner }}"
+    mode: 0644
+
+- name: write out issuing_ca
+  copy: 
+    content: "{{ cert_data.json.data.issuing_ca }}" 
+    dest: "{{ path }}/issuing_ca.pem"
+    owner: "{{ owner }}"
+    group: "{{ owner }}"
+    mode: 0644
+
+# trust the Vault root CA locally
+- name: update-ca-trust enable
+  command: /bin/update-ca-trust enable
+
+- name: install root certificate file locally
+  copy:
+    content: "{{ cert_data.json.data.issuing_ca }}"
+    dest: /etc/pki/ca-trust/source/anchors/vault_ca.crt
+    force: yes
+
+- name: update-ca-trust extract
+  command: /bin/update-ca-trust

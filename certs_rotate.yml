@@ -1,0 +1,9 @@
+# certs_rotate.yml
+---
+- hosts: api-tier
+  serial: 1
+  roles:
+    - { role: proxy-target, state_var: absent }
+    - { role: deploy-certs, owner: "root", path: "/var/www/certs", ttl: "1h" }
+    - { role: deploy-credentials }
+    - { role: proxy-target, state_var: present }

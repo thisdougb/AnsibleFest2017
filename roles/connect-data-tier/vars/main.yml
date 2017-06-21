@@ -1,0 +1,4 @@
+---
+# vars file for roles/connect-data-tier
+
+api_db_user: "{{ inventory_hostname }}_readonly"

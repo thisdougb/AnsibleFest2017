@@ -1,0 +1,44 @@
+---
+# tasks file for roles/deploy-credentials
+
+- name: retrieve keys locally
+  set_fact:
+    vault_keys: "{{ lookup('file','~/.hashicorp_vault_keys.json') | from_json }}"
+  delegate_to: localhost
+  become: no
+
+- name: read mysql secret to vault
+  uri:
+    url: "https://vault.ansiblefest.com:8201/v1/secret/AnsibleFest/database"
+    headers:
+      X-Vault-Token: "{{ vault_keys.root_token }}"
+  delegate_to: localhost
+  become: no
+  register: vault_secret
+
+- name: generate 20-char random password string
+  shell: </dev/urandom tr -dc '1234567890qwertyuiop' | head -c20; echo
+  register: rand_pw_string
+  delegate_to: localhost
+  become: no
+
+- name: set password string as fact
+  set_fact:
+    api_db_password: "{{ rand_pw_string.stdout }}"
+
+- name: "set {{ api_db_user }} db user with new password"
+  mysql_user:
+    name: "{{ api_db_user }}"
+    password: "{{ api_db_password }}"
+    host: "{{ inventory_hostname }}"
+    priv: 'mysql.user:SELECT'
+    state: present
+    login_host: localhost
+    login_user: root
+    login_password: "{{ vault_secret.json.data.mysqlrootpw }}"
+  delegate_to: database
+
+- name: update api code with new password
+  template:
+    dest: /var/www/data.ini
+    src: data.ini.j2

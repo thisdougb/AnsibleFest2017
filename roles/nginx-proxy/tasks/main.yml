@@ -1,0 +1,10 @@
+---
+# tasks file for nginx-proxy
+
+- name: copy new nginx.conf
+  copy:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: 0644
