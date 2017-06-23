@@ -1,0 +1,15 @@
+---
+- name: database
+  ip: 172.28.128.10
+
+- name: api1
+  ip: 172.28.128.12
+
+- name: api2
+  ip: 172.28.128.14
+
+- name: proxy
+  ip: 172.28.128.15
+
+- name: vault
+  ip: 172.28.128.16
