@@ -20,6 +20,6 @@ end
 
 File.open('etc_hosts', 'w') { |f|
   servers.each do |server|
-    f.write("#{server['ip']}\t#{server['name']}\n")
+    f.write("#{server['ip']}\t#{server['name']}\t#{server['name']}.ansiblefest.com\n")
   end
 }

@@ -1,26 +1,28 @@
 ---
 # tasks file for roles/mysql-server
 
-- name: copy mysql repo rpm to host
-  copy:
-    src: mysql57-community-release-el7-10.noarch.rpm
-    dest: /tmp/mysql57-community-release-el7-10.noarch.rpm
-    force: no
+#- name: copy mysql repo rpm to host
+#  copy:
+#    src: mysql57-community-release-el7-10.noarch.rpm
+#    dest: /tmp/mysql57-community-release-el7-10.noarch.rpm
+#    force: no
 
+- name: retrieve repo rpm file for mysql community
+  get_url:
+    url: "{{ mysql_repo_website }}{{ mysql_community_release }}"
+    dest: "/tmp/{{ mysql_community_release }}"
+    mode: 0644
+    force: no
+    
 - name: install mysql repo rpm
   yum:
-    name: /tmp/mysql57-community-release-el7-10.noarch.rpm
+    name: "/tmp/{{ mysql_community_release }}"
     state: present
 
 - name: install mysql client/dev rpms
   yum:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    - mysql-community-client
-    - mysql-devel
-    - python-devel
-    - python-pip
+      name: "{{ required_packages }}"
+      state: present
 
 - name: install pip mysqldb
   pip:
@@ -66,11 +68,9 @@
     delegate_to: localhost
     become: no
 
-  - name: generate random string
-    shell: </dev/urandom tr -dc '1234567890qwertyuiop' | head -c20; echo
-    register: rand_pw_string
-    delegate_to: localhost
-    become: no
+  - name: create a random password string
+    set_fact:
+        rand_pw_string: "{{ lookup('password', '/dev/null length=20 chars=ascii_letters,digits,_!$') }}"
 
   - name: write mysql secret to vault
     uri:
@@ -79,7 +79,7 @@
       headers:
         X-Vault-Token: "{{ vault_keys.root_token }}"
       body:
-        mysqlrootpw: "{{ rand_pw_string.stdout }}"
+        mysqlrootpw: "{{ rand_pw_string }}"
       body_format: json
       status_code: 204
     delegate_to: localhost
@@ -88,9 +88,9 @@
   - name: set initial root password
     mysql_user:
       name: root
-      password: "{{ rand_pw_string.stdout }}"
+      password: "{{ rand_pw_string }}"
       host: localhost
       state: present
     delegate_to: database
 
-  when: mysqlinit | success
+  when: mysqlinit is success

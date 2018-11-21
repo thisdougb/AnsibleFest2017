@@ -6,7 +6,7 @@
     - name: install Ansible ssh key
       authorized_key:
         user: vagrant
-        key: "{{ lookup('file', '/home/fest/.ssh/id_rsa.pub') }}"
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 
     - name: copy /etc/hosts to remote
       copy:
