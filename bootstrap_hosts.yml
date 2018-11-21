@@ -2,11 +2,34 @@
 - hosts: all
 
   tasks:
+      
+    - name: setup the vagrant user with an ssh key
+      user:
+          name: vagrant
+          state: present
+          generate_ssh_key: yes
+          ssh_key_bits: 2048
+          ssh_key_file: .ssh/id_rsa
+      register: result
 
-    - name: install Ansible ssh key
-      authorized_key:
-        user: vagrant
-        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+- hosts: all
+
+  tasks:
+                
+    - name: get all public ssh keys
+      shell: cat ~/.ssh/id_rsa.pub
+      register: ssh_keys
+      become: no
+
+    - name: deploy public keys on demo servers
+      authorized_key: 
+          user: vagrant 
+          key: "{{ item[0] }}"
+      become: no
+      delegate_to: "{{ item[1] }}"
+      with_nested:
+        - "{{ ssh_keys.stdout }}"
+        - "{{ groups['all'] }}"
 
     - name: update /etc/hosts
       blockinfile:
@@ -18,9 +41,11 @@
         name: net-tools
         state: present
 
+
 - hosts: ansible
 
   tasks:
+
     - name: install ansible
       yum:
           name: ansible
@@ -28,11 +53,11 @@
           
     - name: install pip
       yum:
-          name: pip
+          name: python2-pip
           state: present
           
     - name: checkout this repo
       git:
-          repo: git@github.com:thisdougb/AnsibleFest2017.git
-          dest: /home/vagrant/
+          repo: https://github.com/thisdougb/AnsibleFest2017.git
+          dest: /home/vagrant/AnsibleFest2017
       become: no
