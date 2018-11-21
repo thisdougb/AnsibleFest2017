@@ -1,4 +1,12 @@
 ansible
+
+[demo:children]
+secrets-tier
+data-tier
+api-tier
+proxy-tier
+
+[secrets-tier]
 vault
 
 [data-tier]

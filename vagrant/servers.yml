@@ -13,3 +13,6 @@
 
 - name: vault
   ip: 172.28.128.16
+ 
+- name: ansible
+  ip: 172.28.128.17
