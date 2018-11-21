@@ -2,34 +2,6 @@
 - hosts: all
 
   tasks:
-      
-    - name: setup the vagrant user with an ssh key
-      user:
-          name: vagrant
-          state: present
-          generate_ssh_key: yes
-          ssh_key_bits: 2048
-          ssh_key_file: .ssh/id_rsa
-      register: result
-
-- hosts: all
-
-  tasks:
-                
-    - name: get all public ssh keys
-      shell: cat ~/.ssh/id_rsa.pub
-      register: ssh_keys
-      become: no
-
-    - name: deploy public keys on demo servers
-      authorized_key: 
-          user: vagrant 
-          key: "{{ item[0] }}"
-      become: no
-      delegate_to: "{{ item[1] }}"
-      with_nested:
-        - "{{ ssh_keys.stdout }}"
-        - "{{ groups['all'] }}"
 
     - name: update /etc/hosts
       blockinfile:
@@ -46,6 +18,23 @@
 
   tasks:
 
+    - name: setup the vagrant user with an ssh key
+      user:
+          name: vagrant
+          state: present
+          generate_ssh_key: yes
+          ssh_key_bits: 2048
+          ssh_key_file: .ssh/id_rsa
+      register: result
+
+    - name: deploy public key on demo servers
+      authorized_key: 
+          user: vagrant 
+          key: "{{ result.ssh_public_key }}"
+      become: no
+      delegate_to: "{{ item }}"
+      loop: "{{ groups['demo'] }}"
+      
     - name: install ansible
       yum:
           name: ansible
