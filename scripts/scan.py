@@ -13,7 +13,7 @@ def state_colour(current_state):
     if current_state:
         return '\033[1;33m' # YELLOW
     else:
-        return '\033[1;37m' # WHITE
+        return '\033[1;34m' # WHITE
 
 nodes = {}
 header_idx = 0
