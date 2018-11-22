@@ -45,6 +45,12 @@
           name: python2-pip
           state: present
           
+    - name: upgrade pip
+      command: pip install --upgrade pip
+      
+    - name: install requests package for health check script
+      command: pip install --upgrade requests
+      
     - name: checkout this repo
       git:
           repo: https://github.com/thisdougb/AnsibleFest2017.git
