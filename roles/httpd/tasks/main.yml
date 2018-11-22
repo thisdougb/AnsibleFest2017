@@ -3,12 +3,8 @@
 
 - name: install webserver rpms
   yum:
-    name: "{{ item }}"
+    name: "{{ webserver_packages }}"
     state: present
-  with_items:
-    - httpd
-    - php
-    - php-mysql
 
 - name: start httpd
   service:

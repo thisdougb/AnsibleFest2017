@@ -1,9 +1,9 @@
 ---
 # defaults file for roles/mysql-server
-mysql_repo_website: http://http://repo.mysql.com/
-mysql_community_release: mysql57-community-release-el7-10.noarch.rpm
+mysql_repo_website: http://repo.mysql.com/
+mysql_community_release: mysql57-community-release-el7.rpm
 
-required_packages:
+database_packages:
         - mysql-community-client
         - mysql-devel
         - python-devel

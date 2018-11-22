@@ -13,6 +13,7 @@
     dest: "/tmp/{{ mysql_community_release }}"
     mode: 0644
     force: no
+    timeout: 30
     
 - name: install mysql repo rpm
   yum:
@@ -21,7 +22,7 @@
 
 - name: install mysql client/dev rpms
   yum:
-      name: "{{ required_packages }}"
+      name: "{{ database_packages }}"
       state: present
 
 - name: install pip mysqldb

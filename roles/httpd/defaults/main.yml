@@ -1,2 +1,7 @@
 ---
 # defaults file for roles/httpd
+
+webserver_packages:
+    - httpd
+    - php
+    - php-mysql
