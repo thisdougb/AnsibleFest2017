@@ -37,12 +37,8 @@
 
     - name: install yum packages
       yum:
-          name: "{{ item }}"
+          name: ['ansible', 'python3-pip', 'git']
           state: present
-      with_items:
-          - ansible
-          - python3-pip
-          - git
 
     - name: upgrade pip
       command: pip3 install --upgrade pip
