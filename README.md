@@ -9,11 +9,23 @@ Demo screencast: https://vimeo.com/224764672
 Install [Vagrant](https://www.vagrantup.com/downloads.html), for which you'll need something like [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
 
 Create Vagrant instances to run the vault, see the sub-dir _vagrant_ from this repo.
+The Vagrantfile contains the path to the local user ssh pub key, check it's correct.
+Then _vagrant up_ to get started.
+
+```
+dev-laptop $ vagrant up
+Bringing machine 'database' up with 'virtualbox' provider...
+Bringing machine 'api1' up with 'virtualbox' provider...
+Bringing machine 'api2' up with 'virtualbox' provider...
+Bringing machine 'proxy' up with 'virtualbox' provider...
+Bringing machine 'vault' up with 'virtualbox' provider...
+Bringing machine 'ansible' up with 'virtualbox' provider...
+```
 
 ### Ansible Bootstrap
-Bootstrap the new vault instance, installing the ssh key (should match private_key_file from ansible.cfg).   We also install the hosts file, picked up from /vagrant/etc_hosts on the new vault instance.   When not using Vagrant you'll need to workaround this and populate the /etc/hosts file.
+Bootstrap the new vault instance, installing the ssh key (should match private_key_file from ansible.cfg).   We also install the hosts file, picked up from ./vagrant/etc_hosts on the new vault instance.   When not using Vagrant you'll need to workaround this and populate the /etc/hosts file.
 ```
-ansible $ $ ansible-playbook -k -K bootstrap_hosts.yml
+dev-laptop $ ansible-playbook 00_bootstrap_hosts.yml
 SSH password:
 SUDO password[defaults to SSH password]:
 
@@ -49,16 +61,19 @@ vault                      : ok=3    changed=1    unreachable=0    failed=0
 ```
 
 ### Setup Demo
-Now you can go ahead and configure the instances
+Now you can go ahead and configure the instances, so login to the ansible control node:
 ```
-ansible $ ansible-playbook site.yml
+dev-laptop $ ssh vagrant@ansible
+ansible $ cd AnsibleFest2017
+ansible $ ansible-playbook 01_build_vault.yml
+ansible $ ansible-playbook 02_build_demo_env.yml
+ansible $ ansible-playbook 03_build_demo_env_ssl.yml
 ```
 
 ### Quick Status Check
 The master node (node1) should show both slaves nodes connected and streaming replication data:
 ```
 ansible $ ssh root@node1
-root@node1's password:
 
 [root@node1 ~]# su - postgres
 -bash-4.2$ psql
