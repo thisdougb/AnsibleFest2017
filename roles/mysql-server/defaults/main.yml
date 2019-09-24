@@ -6,5 +6,5 @@ mysql_community_release: mysql57-community-release-el7.rpm
 database_packages:
         - mysql-community-client
         - mysql-devel
-        - python-devel
-        - python-pip
+        - python3-devel
+        - python3-pip
