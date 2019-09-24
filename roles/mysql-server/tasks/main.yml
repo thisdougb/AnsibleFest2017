@@ -14,7 +14,7 @@
     mode: 0644
     force: no
     timeout: 30
-    
+
 - name: install mysql repo rpm
   yum:
     name: "/tmp/{{ mysql_community_release }}"
@@ -27,7 +27,8 @@
 
 - name: install pip mysqldb
   pip:
-    name: MySQL-python
+    name: PyMySQL
+    executable: /usr/bin/pip3
 
 - name: install mysql server rpm
   yum:
