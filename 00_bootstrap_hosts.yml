@@ -28,29 +28,29 @@
       register: result
 
     - name: deploy public key on demo servers
-      authorized_key: 
-          user: vagrant 
+      authorized_key:
+          user: vagrant
           key: "{{ result.ssh_public_key }}"
       become: no
       delegate_to: "{{ item }}"
       loop: "{{ groups['demo'] }}"
-      
+
     - name: install ansible
       yum:
           name: ansible
           state: present
-          
+
     - name: install pip
       yum:
-          name: python2-pip
+          name: python3-pip
           state: present
-          
+
     - name: upgrade pip
-      command: pip install --upgrade pip
-      
+      command: pip3 install --upgrade pip
+
     - name: install requests package for health check script
-      command: pip install --upgrade requests
-      
+      command: pip3 install --upgrade requests
+
     - name: checkout this repo
       git:
           repo: https://github.com/thisdougb/AnsibleFest2017.git
