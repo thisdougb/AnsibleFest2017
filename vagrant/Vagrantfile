@@ -14,6 +14,7 @@ Vagrant.configure("2") do |config|
     config.vm.define server['name'] do |srv|
       srv.vm.hostname = server['name']
       srv.vm.network "private_network", ip: server['ip']
+      srv.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "~/.ssh/authorized_keys"
     end
   end
 end
