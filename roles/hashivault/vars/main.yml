@@ -1,7 +1,7 @@
 ---
 # vars file for hashicorp-vault
 
-vault_src: https://releases.hashicorp.com/vault/0.6.2/vault_0.6.2_linux_amd64.zip
+vault_src: https://releases.hashicorp.com/vault/1.2.3/vault_1.2.3_linux_amd64.zip
 user_name: vault
 group_name: vault
 binary_path: /usr/local/bin/
