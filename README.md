@@ -6,14 +6,16 @@ From my AnsibleFest Tech Deep Dive Session.   Vagrant and Ansible code to demo a
 Demo screencast: https://vimeo.com/224764672
 
 ### Create Vagrant Instances
+Install [Vagrant](https://www.vagrantup.com/downloads.html), for which you'll need something like [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+
 Create Vagrant instances to run the vault, see the sub-dir _vagrant_ from this repo.
 
 ### Ansible Bootstrap
 Bootstrap the new vault instance, installing the ssh key (should match private_key_file from ansible.cfg).   We also install the hosts file, picked up from /vagrant/etc_hosts on the new vault instance.   When not using Vagrant you'll need to workaround this and populate the /etc/hosts file.
 ```
-ansible $ $ ansible-playbook -k -K bootstrap_hosts.yml 
-SSH password: 
-SUDO password[defaults to SSH password]: 
+ansible $ $ ansible-playbook -k -K bootstrap_hosts.yml
+SSH password:
+SUDO password[defaults to SSH password]:
 
 PLAY [all] *******************************************************************************************************************************************
 
@@ -43,7 +45,7 @@ api1                       : ok=3    changed=1    unreachable=0    failed=0
 api2                       : ok=3    changed=1    unreachable=0    failed=0   
 database                   : ok=3    changed=1    unreachable=0    failed=0   
 proxy                      : ok=3    changed=1    unreachable=0    failed=0   
-vault                      : ok=3    changed=1    unreachable=0    failed=0 
+vault                      : ok=3    changed=1    unreachable=0    failed=0
 ```
 
 ### Setup Demo
@@ -56,7 +58,7 @@ ansible $ ansible-playbook site.yml
 The master node (node1) should show both slaves nodes connected and streaming replication data:
 ```
 ansible $ ssh root@node1
-root@node1's password: 
+root@node1's password:
 
 [root@node1 ~]# su - postgres
 -bash-4.2$ psql
@@ -72,7 +74,7 @@ postgres=# select r.client_addr, r.usename, r.state, r.sent_location, s.passwd f
 ```
 Now we can rotate the slave node credentials:
 ```
-ansible $ ansible-playbook rotate.yml 
+ansible $ ansible-playbook rotate.yml
 
 PLAY [slaves] *********************************************************************************************************************************
 
@@ -107,9 +109,9 @@ node3                      : ok=6    changed=4    unreachable=0    failed=0
 On the slaves the connection string data:
 ```
 ansible $ ssh root@node2
-root@node2's password: 
+root@node2's password:
 Last login: Tue Dec  6 13:39:33 2016
-[root@node2 ~]# cat /var/lib/pgsql/data/recovery.conf 
+[root@node2 ~]# cat /var/lib/pgsql/data/recovery.conf
 standby_mode = 'on'
 primary_conninfo = 'host=node1 port=5432 user=repl_node2 password=ratCcFRm27XE3BKazBbw'
 trigger_file = '/tmp/trigger'
