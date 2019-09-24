@@ -10,7 +10,7 @@
 
     - name: install net-tools
       yum:
-        name: net-tools
+        name: ['net-tools', 'unzip']
         state: present
 
 
@@ -37,7 +37,7 @@
 
     - name: install yum packages
       yum:
-          name: ['ansible', 'python3-pip', 'git']
+          name: ['ansible', 'python3-pip', 'git', 'unzip']
           state: present
 
     - name: upgrade pip
