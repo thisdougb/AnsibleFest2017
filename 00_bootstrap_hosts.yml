@@ -13,6 +13,10 @@
         name: ['net-tools', 'unzip']
         state: present
 
+    - name: Disable SELinux
+      selinux:
+        state: disabled
+
 
 - hosts: ansible
 
