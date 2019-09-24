@@ -17,6 +17,19 @@
       selinux:
         state: disabled
 
+    - name: Reboot node and stop polling.
+      shell: reboot
+      async: 10 # Do not care for 10 sec
+      poll: 0 # Fire & Forget
+
+    - name: wait for host to finish reboot
+      wait_for:
+       port: "{{ (ansible_port|default(ansible_ssh_port))|default(22) }}"
+       host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+       search_regex: OpenSSH
+       delay: 5  # Do not check for at least 10 sec
+      connection: local
+      become: no
 
 - hosts: ansible
 
